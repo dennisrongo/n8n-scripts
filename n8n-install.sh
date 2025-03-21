@@ -1,13 +1,17 @@
 #!/bin/bash
 
-# Install n8n with Docker and Traefik
-# -----------------------------------
+# Improved n8n Installation with Docker and Traefik
+# ------------------------------------------------
 
 echo "Starting installation process..."
 
 # Check for any updates
-echo "Checking for updates..."
+echo "Checking for system updates..."
 sudo apt update
+
+# Install required tools
+echo "Installing curl, wget, and git..."
+sudo apt install -y curl wget git
 
 # Install Docker
 echo "Installing Docker..."
@@ -22,11 +26,25 @@ sudo systemctl enable docker
 echo "Installing Docker Compose..."
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.30.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
-sudo docker-compose --version
 
-# Create docker-compose.yaml
-echo "Creating docker-compose.yaml..."
-cat > docker-compose.yaml << 'EOL'
+# Verify Docker Compose installation
+echo "Verifying Docker Compose installation..."
+docker_compose_version=$(sudo docker-compose --version)
+echo "Installed: $docker_compose_version"
+
+# Create project directory
+echo "Creating project directory..."
+mkdir -p ~/n8n-traefik
+cd ~/n8n-traefik
+
+# Download docker-compose.yaml from GitHub
+echo "Downloading docker-compose.yaml from GitHub..."
+wget https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/docker-compose.yaml -O docker-compose.yaml
+
+# If the URL doesn't exist yet, here's a fallback to create the file
+if [ $? -ne 0 ]; then
+    echo "Failed to download from GitHub. Creating local docker-compose.yaml file instead..."
+    cat > docker-compose.yaml << 'EOL'
 version: "3.8"
 services:
   traefik:
@@ -86,6 +104,8 @@ volumes:
   n8n_data:
     external: true
 EOL
+    echo "Local docker-compose.yaml file created."
+fi
 
 # Create .env file
 echo "Creating .env file..."
@@ -110,7 +130,7 @@ SUBDOMAIN=n8n
 GENERIC_TIMEZONE=America/Los_Angeles
 
 # The email address to use for the SSL certificate creation
-SSL_EMAIL=dennis@menacestudio.com
+SSL_EMAIL=your-email@example.com
 EOL
 
 # Setup volumes
@@ -118,8 +138,32 @@ echo "Setting up Docker volumes..."
 sudo docker volume create traefik_data
 sudo docker volume create n8n_data
 
-echo "Installation complete! Edit your .env file with your domain information."
-echo "Then run 'sudo docker-compose up -d' to start the containers in detached mode."
-echo "Or run 'sudo docker-compose up' to see the logs in real-time."
+echo "============================================================"
+echo "Installation complete! Follow these steps to start n8n:"
+echo "1. Edit your .env file with your domain information:"
+echo "   nano ~/n8n-traefik/.env"
+echo ""
+echo "2. Start the containers in detached mode:"
+echo "   cd ~/n8n-traefik && sudo docker-compose up -d"
+echo ""
+echo "3. To view logs:"
+echo "   cd ~/n8n-traefik && sudo docker-compose logs -f"
+echo "============================================================"
 
-echo "Remember to customize the .env file before starting the service!"
+# Prompt user to edit .env file
+read -p "Would you like to edit the .env file now? (y/n): " edit_env
+if [[ $edit_env == "y" ]]; then
+    nano ~/n8n-traefik/.env
+    
+    # Ask if user wants to start the containers
+    read -p "Would you like to start the containers now? (y/n): " start_containers
+    if [[ $start_containers == "y" ]]; then
+        cd ~/n8n-traefik
+        sudo docker-compose up -d
+        echo "Containers started in detached mode."
+    else
+        echo "You can start the containers later with: cd ~/n8n-traefik && sudo docker-compose up -d"
+    fi
+else
+    echo "Remember to customize the .env file before starting the service!"
+fi
