@@ -72,6 +72,23 @@ sudo docker-compose logs -f
 
 3. Access n8n in your web browser at `https://n8n.yourdomain.com` (replace with your actual domain).
 
+## Step 5: Create DNS Record
+
+1. Get your server's public IP.
+
+2. In your domain's DNS settings:
+   - Create an **A record** with:
+     - **Host**: Your SUBDOMAIN from `.env` (e.g., `n8n`)
+     - **Value**: Server's IP address
+     - **TTL**: 3600 (default)
+
+3. Verify setup (may take up to 1 hour):
+   ```bash
+   dig +short [SUBDOMAIN].[DOMAIN_NAME]  # Should return your IP
+   ```
+
+Example: If using `SUBDOMAIN=n8n` and `DOMAIN_NAME=example.com`, create an A record for `n8n` pointing to your server IP.
+
 ## Managing Your n8n Installation
 
 ### Stopping n8n
