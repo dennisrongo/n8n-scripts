@@ -11,22 +11,10 @@ This guide walks you through setting up n8n on a Linux VPS using Docker, Docker 
 
 ## Step 1: Download and Run the Installation Script
 
-1. Download the installation script directly from GitHub:
+Download the installation script directly from GitHub, make the script executable and execute the script:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/n8n-install.sh -o install_n8n.sh
-```
-
-2. Make the script executable:
-
-```bash
-chmod +x install_n8n.sh
-```
-
-3. Execute the installation script:
-
-```bash
-./install_n8n.sh
+curl -sSL https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/n8n-install.sh -o n8n-install.sh && chmod +x n8n-install.sh && ./n8n-install.sh
 ```
 
 The script will:
