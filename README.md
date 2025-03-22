@@ -32,8 +32,14 @@ Example: To make n8n accessible at `n8n.example.com`, create an A record for `n8
 
 Download the installation script directly from GitHub, make the script executable and execute the script:
 
+#### SQLite
 ```bash
 curl -sSL https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/n8n-install.sh -o n8n-install.sh && chmod +x n8n-install.sh && ./n8n-install.sh
+```
+
+#### Postgres
+```bash
+curl -sSL https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/n8n-pg-install.sh -o n8n-postgres-install.sh && chmod +x n8n-postgres-install.sh && ./n8n-postgres-install.sh
 ```
 
 The script will:
