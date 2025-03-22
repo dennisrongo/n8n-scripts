@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Improved n8n Installation with Docker, Traefik, and PostgreSQL
-# -------------------------------------------------------------
-
 echo "Starting installation process..."
 
 # Check for any updates
@@ -37,14 +34,14 @@ echo "Creating project directory..."
 mkdir -p ~/n8n-traefik
 cd ~/n8n-traefik
 
-# Download docker-compose-postgres.yaml from GitHub
-echo "Downloading docker-compose-postgres.yaml from GitHub..."
-wget https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/docker-compose-postgres.yaml -O docker-compose-postgres.yaml
+# Download docker-compose.yaml from GitHub
+echo "Downloading docker-compose.yaml from GitHub..."
+wget https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/docker-compose-postgres.yaml -O docker-compose.yaml
 
-# Fallback to create the local docker-compose-postgres.yaml file if download fails
+# Fallback to create the local docker-compose.yaml file if download fails
 if [ $? -ne 0 ]; then
-    echo "Failed to download docker-compose-postgres.yaml from GitHub. Creating local file instead..."
-    cat > docker-compose-postgres.yaml << 'EOL'
+    echo "Failed to download docker-compose.yaml from GitHub. Creating local file instead..."
+    cat > docker-compose.yaml << 'EOL'
 version: "3.8"
 services:
   traefik:
@@ -117,7 +114,7 @@ volumes:
   n8n_data:
     external: true
 EOL
-    echo "Local docker-compose-postgres.yaml file created."
+    echo "Local docker-compose.yaml file created."
 fi
 
 # Create .env file
@@ -153,10 +150,10 @@ echo "1. Edit your .env file with your domain information:"
 echo "   nano ~/n8n-traefik/.env"
 echo ""
 echo "2. Start the containers in detached mode:"
-echo "   cd ~/n8n-traefik && sudo docker-compose -f docker-compose-postgres.yaml up -d"
+echo "   cd ~/n8n-traefik && sudo docker-compose up -d"
 echo ""
 echo "3. To view logs:"
-echo "   cd ~/n8n-traefik && sudo docker-compose -f docker-compose-postgres.yaml logs -f"
+echo "   cd ~/n8n-traefik && sudo docker-compose logs -f"
 echo "============================================================"
 
 # Prompt user to edit .env file
@@ -164,15 +161,4 @@ read -p "Would you like to edit the .env file now? (y/n): " edit_env
 if [[ $edit_env == "y" ]]; then
     nano ~/n8n-traefik/.env
     
-    # Ask if user wants to start the containers
-    read -p "Would you like to start the containers now? (y/n): " start_containers
-    if [[ $start_containers == "y" ]]; then
-        cd ~/n8n-traefik
-        sudo docker-compose -f docker-compose-postgres.yaml up -d
-        echo "Containers started in detached mode."
-    else
-        echo "You can start the containers later with: cd ~/n8n-traefik && sudo docker-compose -f docker-compose-postgres.yaml up -d"
-    fi
-else
-    echo "Remember to customize the .env file before starting the service!"
-fi
+    # Ask if user wants
