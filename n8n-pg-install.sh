@@ -158,7 +158,20 @@ echo "============================================================"
 
 # Prompt user to edit .env file
 read -p "Would you like to edit the .env file now? (y/n): " edit_env
-if [[ $edit_env == "y" ]]; then
+if [[ $edit_env == "y" || $edit_env == "Y" ]]; then
     nano ~/n8n-traefik/.env
     
-    # Ask if user wants
+    # Ask if user wants to start the containers
+    read -p "Would you like to start the containers now? (y/n): " start_containers
+    if [[ $start_containers == "y" || $start_containers == "Y" ]]; then
+        echo "Starting containers..."
+        cd ~/n8n-traefik && sudo docker-compose up -d
+        echo "Containers started! Access n8n at https://${SUBDOMAIN}.${DOMAIN_NAME} once DNS is configured."
+    else
+        echo "You can start the containers later with: cd ~/n8n-traefik && sudo docker-compose up -d"
+    fi
+else
+    echo "You can edit the .env file later with: nano ~/n8n-traefik/.env"
+fi
+
+echo "Installation completed successfully!"
