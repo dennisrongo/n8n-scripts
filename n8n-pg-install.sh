@@ -41,6 +41,92 @@ cd ~/n8n-traefik
 echo "Downloading docker-compose-postgres.yaml from GitHub..."
 wget https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/docker-compose-postgres.yaml -O docker-compose-postgres.yaml
 
+# Fallback to create the local docker-compose-postgres.yaml file if download fails
+if [ $? -ne 0 ]; then
+    echo "Failed to download docker-compose-postgres.yaml from GitHub. Creating local file instead..."
+    cat > docker-compose-postgres.yaml << 'EOL'
+version: "3.8"
+services:
+  traefik:
+    image: "traefik"
+    restart: always
+    command:
+      - "--api=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)
+      - traefik.http.routers.n8n.tls=true
+      - traefik.http.routers.n8n.entrypoints=web,websecure
+      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.n8n.headers.SSLRedirect=true
+      - traefik.http.middlewares.n8n.headers.STSSeconds=315360000
+      - traefik.http.middlewares.n8n.headers.browserXSSFilter=true
+      - traefik.http.middlewares.n8n.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.n8n.headers.forceSTSHeader=true
+      - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.n8n.headers.STSPreload=true
+      - traefik.http.routers.n8n.middlewares=n8n@docker
+    environment:
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      # PostgreSQL configuration
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_SCHEMA=public
+      - DB_POSTGRESDB_SSL=false  # Local PostgreSQL typically does not use SSL
+    volumes:
+      - n8n_data:/home/node/.n8n
+volumes:
+  traefik_data:
+    external: true
+  n8n_data:
+    external: true
+  postgres_data:
+EOL
+    echo "Local docker-compose-postgres.yaml file created."
+fi
+
 # Create .env file
 echo "Creating .env file..."
 cat > .env << 'EOL'
@@ -65,13 +151,6 @@ GENERIC_TIMEZONE=America/Los_Angeles
 
 # The email address to use for the SSL certificate creation
 SSL_EMAIL=your-email@example.com
-
-# Supabase connection details (if using Supabase instead of local Postgres)
-# SUPABASE_HOST=your-project-ref.supabase.co
-# SUPABASE_PORT=5432
-# SUPABASE_DATABASE=postgres
-# SUPABASE_USER=postgres
-# SUPABASE_PASSWORD=your-database-password
 EOL
 
 # Setup volumes
