@@ -9,7 +9,26 @@ This guide walks you through setting up n8n on a Linux VPS using Docker, Docker 
 - A domain name pointing to your VPS
 - Basic familiarity with command line
 
-## Step 1: Download and Run the Installation Script
+## Step 1: Create DNS Record
+
+Before installing n8n, you'll need to set up a DNS record for your domain:
+
+1. Get your server's public IP.
+
+2. In your domain's DNS settings:
+   - Create an **A record** with:
+     - **Host**: The subdomain you plan to use (e.g., `n8n`)
+     - **Value**: Server's IP address
+     - **TTL**: 3600 (default)
+
+3. Verify setup (may take up to 1 hour):
+   ```bash
+   dig +short subdomain.yourdomain.com  # Should return your IP
+   ```
+
+Example: To make n8n accessible at `n8n.example.com`, create an A record for `n8n` pointing to your server IP.
+
+## Step 2: Download and Run the Installation Script
 
 Download the installation script directly from GitHub, make the script executable and execute the script:
 
@@ -25,12 +44,12 @@ The script will:
 - Prompt you to edit the `.env` file
 - Offer to start the containers
 
-## Step 2: Configure Your Environment
+## Step 3: Configure Your Environment
 
 When prompted, edit your `.env` file with the following information:
 
 - `DOMAIN_NAME`: Your actual domain (e.g., `yourdomain.com`)
-- `SUBDOMAIN`: The subdomain for n8n (e.g., `n8n`)
+- `SUBDOMAIN`: The subdomain for n8n that you set up in Step 1 (e.g., `n8n`)
 - `SSL_EMAIL`: Your email address for SSL certificate registration
 - `GENERIC_TIMEZONE`: Your preferred timezone
 
@@ -45,7 +64,7 @@ GENERIC_TIMEZONE=UTC
 
 This would make n8n accessible at `https://n8n.yourdomain.com`.
 
-## Step 3: Start the n8n Service
+## Step 4: Start the n8n Service
 
 If you didn't start the service during the script execution, you can start it manually:
 
@@ -56,7 +75,7 @@ sudo docker-compose up -d
 
 The `-d` flag runs the containers in detached mode (background).
 
-## Step 4: Verify the Installation
+## Step 5: Verify the Installation
 
 1. Check if the containers are running:
 
@@ -71,23 +90,6 @@ sudo docker-compose logs -f
 ```
 
 3. Access n8n in your web browser at `https://n8n.yourdomain.com` (replace with your actual domain).
-
-## Step 5: Create DNS Record
-
-1. Get your server's public IP.
-
-2. In your domain's DNS settings:
-   - Create an **A record** with:
-     - **Host**: Your SUBDOMAIN from `.env` (e.g., `n8n`)
-     - **Value**: Server's IP address
-     - **TTL**: 3600 (default)
-
-3. Verify setup (may take up to 1 hour):
-   ```bash
-   dig +short [SUBDOMAIN].[DOMAIN_NAME]  # Should return your IP
-   ```
-
-Example: If using `SUBDOMAIN=n8n` and `DOMAIN_NAME=example.com`, create an A record for `n8n` pointing to your server IP.
 
 ## Managing Your n8n Installation
 
@@ -172,6 +174,28 @@ For reference, the installation script performs the following tasks:
 2. Creates configuration files (docker-compose.yaml and .env)
 3. Sets up Docker volumes for data persistence
 4. Guides you through configuration and startup
+
+## Complete Cleanup
+
+If you need to completely remove n8n and all associated data:
+
+```bash
+# Stop and remove containers
+cd ~/n8n-traefik
+sudo docker-compose down
+
+# Remove the Docker volumes
+sudo docker volume rm n8n_data traefik_data
+
+# Remove Docker images (optional)
+sudo docker rmi docker.n8n.io/n8nio/n8n traefik
+
+# Remove the installation directory
+cd ~
+rm -rf ~/n8n-traefik
+```
+
+**Warning**: This will permanently delete all your n8n workflows, credentials, and configurations. Make sure to back up any important data before proceeding.
 
 ## Developer
 
