@@ -130,27 +130,22 @@ fi
 # Create .env file
 echo "Creating .env file..."
 cat > .env << 'EOL'
-POSTGRES_USER=n8n
-POSTGRES_PASSWORD=n8n_password
-POSTGRES_DB=n8n
-POSTGRES_NON_ROOT_USER=n8n_user
-POSTGRES_NON_ROOT_PASSWORD=n8n_user_password
-
-# The top level domain to serve from
+# Domain Configuration
 DOMAIN_NAME=example.com
-
-# The subdomain to serve from
 SUBDOMAIN=n8n
 
-# DOMAIN_NAME and SUBDOMAIN combined decide where n8n will be reachable from
-# above example would result in: <https://n8n.example.com>
+# SSL Configuration
+SSL_EMAIL=your-email@example.com
 
-# Optional timezone to set which gets used by Cron-Node by default
-# If not set New York time will be used
+# Timezone Settings
 GENERIC_TIMEZONE=America/Los_Angeles
 
-# The email address to use for the SSL certificate creation
-SSL_EMAIL=your-email@example.com
+# Supabase PostgreSQL Connection Details
+SUPABASE_HOST=your-project-id.supabase.co
+SUPABASE_PORT=5432
+SUPABASE_DATABASE=postgres
+SUPABASE_USER=postgres
+SUPABASE_PASSWORD=your-database-password
 EOL
 
 # Setup volumes
