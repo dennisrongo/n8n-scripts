@@ -69,16 +69,6 @@ services:
       - traefik_data:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  postgres:
-    image: postgres:latest
-    restart: always
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
   n8n:
     image: docker.n8n.io/n8nio/n8n
     restart: always
@@ -106,23 +96,26 @@ services:
       - NODE_ENV=production
       - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
-      # PostgreSQL configuration
+      # Supabase PostgreSQL configuration
       - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB}
-      - DB_POSTGRESDB_USER=${POSTGRES_USER}
-      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_POSTGRESDB_HOST=${SUPABASE_HOST}
+      - DB_POSTGRESDB_PORT=${SUPABASE_PORT:-5432}
+      - DB_POSTGRESDB_DATABASE=${SUPABASE_DATABASE:-postgres}
+      - DB_POSTGRESDB_USER=${SUPABASE_USER}
+      - DB_POSTGRESDB_PASSWORD=${SUPABASE_PASSWORD}
       - DB_POSTGRESDB_SCHEMA=public
-      - DB_POSTGRESDB_SSL=false  # Local PostgreSQL typically does not use SSL
+      # Supabase requires SSL connections
+      - DB_POSTGRESDB_SSL=true
+      # Uncomment if you have SSL certificate verification issues
+      # - DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED=false
     volumes:
-      - n8n_data:/home/node/.n8n
+      - n8n_data:/home/node/.n8n  # Still needed for credentials, temporary files, etc.
+
 volumes:
   traefik_data:
     external: true
   n8n_data:
     external: true
-  postgres_data:
 EOL
     echo "Local docker-compose-postgres.yaml file created."
 fi
