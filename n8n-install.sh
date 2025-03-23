@@ -110,12 +110,6 @@ fi
 # Create .env file
 echo "Creating .env file..."
 cat > .env << 'EOL'
-POSTGRES_USER=user
-POSTGRES_PASSWORD=password
-POSTGRES_DB=n8n
-POSTGRES_NON_ROOT_USER=user
-POSTGRES_NON_ROOT_PASSWORD=password
-
 # The top level domain to serve from
 DOMAIN_NAME=example.com
 
