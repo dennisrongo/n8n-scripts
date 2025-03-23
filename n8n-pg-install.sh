@@ -36,7 +36,7 @@ cd ~/n8n-traefik
 
 # Download docker-compose.yaml from GitHub
 echo "Downloading docker-compose.yaml from GitHub..."
-wget https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/docker-compose-postgres.yaml -O docker-compose.yaml
+wget https://raw.githubusercontent.com/dennisrongo/n8n-scripts/refs/heads/master/docker-compose-pg.yaml -O docker-compose.yaml
 
 # Fallback to create the local docker-compose.yaml file if download fails
 if [ $? -ne 0 ]; then
