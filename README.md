@@ -9,6 +9,8 @@ This guide walks you through setting up n8n on a Linux VPS using Docker, Docker 
 - A domain name pointing to your VPS
 - Basic familiarity with command line
 
+## Step 
+
 ## Step 1: Create DNS Record
 
 Before installing n8n, you'll need to set up a DNS record for your domain:
@@ -27,6 +29,14 @@ Before installing n8n, you'll need to set up a DNS record for your domain:
    ```
 
 Example: To make n8n accessible at `n8n.example.com`, create an A record for `n8n` pointing to your server IP.
+
+## Step 1A
+
+Go to your terminal and generate a public and private key. Add the public key to your VPS provider.
+   ```bash
+   ssh-keygen -t rsa -b 4096
+   ssh root@server_ip
+   ```
 
 ## Step 2: Download and Run the Installation Script
 
