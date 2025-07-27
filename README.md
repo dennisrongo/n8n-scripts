@@ -176,6 +176,58 @@ cd ~/n8n-traefik
 sudo docker-compose up -d
 ```
 
+### 404 Error When Accessing n8n
+
+If you get a 404 error when trying to access your n8n instance:
+
+1. **Check DNS resolution**:
+   ```bash
+   dig +short your-subdomain.yourdomain.com
+   ```
+   This should return your server's IP address.
+
+2. **Verify containers are running**:
+   ```bash
+   sudo docker-compose ps
+   ```
+   Both n8n and traefik containers should show as "Up".
+
+3. **Check Traefik dashboard** (if enabled):
+   Access `https://traefik.yourdomain.com` to see if your n8n service is registered.
+
+4. **Verify domain configuration in .env file**:
+   ```bash
+   cat .env
+   ```
+   Ensure `DOMAIN_NAME` and `SUBDOMAIN` match your DNS setup.
+
+5. **Check Traefik logs for routing issues**:
+   ```bash
+   sudo docker-compose logs traefik | grep -i error
+   ```
+
+6. **Fix Docker socket permissions** (Recommended):
+   ```bash
+   # Add your user to the docker group
+   sudo usermod -aG docker $USER
+   
+   # Fix the Docker socket permissions
+   sudo chmod 666 /var/run/docker.sock
+   
+   # Restart the containers
+   cd ~/n8n-traefik
+   sudo docker-compose down
+   sudo docker-compose up -d
+   ```
+
+7. **Restart services if configuration was changed**:
+   ```bash
+   sudo docker-compose down
+   sudo docker-compose up -d
+   ```
+
+8. **Wait for SSL certificate generation**: Initial setup may take 5-10 minutes for Let's Encrypt certificate provisioning.
+
 ## Security Considerations
 
 - The n8n admin interface is publicly accessible. Consider setting up authentication.
